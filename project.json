@@ -1,21 +1,21 @@
 {
   "name": "触屏贪吃蛇",
   "brief": "方向键与滑动操控的贪吃蛇，吃食加分，撞墙咬己即终局计分。",
-  "work_ref": "WORKS-",
+  "work_ref": "WORKS-3575",
   "entry": "src/main.js",
   "status": "ok",
   "files": [
     {
       "path": "src/engine.js",
-      "role": "引擎：贪吃蛇状态、移动/转向规则、碰撞判定、食物生成、计分"
+      "role": ""
     },
     {
       "path": "src/ui.js",
-      "role": "界面：画布渲染（网格/蛇/食物）、计分板、开始引导与结束弹层、虚拟方向键与触屏滑动手势"
+      "role": ""
     },
     {
       "path": "src/main.js",
-      "role": "入口：创建画布、装配 engine/ui，唯一 Work.register 容器声明（mount+destroy），负责 RAF 与监听的生命周期"
+      "role": ""
     }
   ],
   "generated_by": "proj_forge（AI 工程工坊）"

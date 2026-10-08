@@ -37,14 +37,22 @@ function mount(ctx) {
 
   Engine.init(b.w, b.h);
   UI.init(ctx.stage, canvas, Engine.state, {
-    onSwipe: function (dir) { Engine.turn(dir); },   // 触屏滑动转向
-    onRestart: function () { Engine.reset(); }        // 结束后点按重开
+    onSwipe: function (dir) { Engine.turn(dir); },      // 触屏滑动转向
+    onRestart: function () {                            // 结束后点按重开
+      Engine.reset();
+      Engine.setPaused(false);                          // 重开清除暂停，不残留
+    },
+    onPause: function () { Engine.togglePause(); }      // 暂停按钮切换
   });
 
   // 键盘仅作快捷方式（主要操作为触屏滑动 + 虚拟方向键）
   var keyFn = function (e) {
     var map = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' };
-    if (map[e.key]) { Engine.turn(map[e.key]); e.preventDefault(); }
+    if (map[e.key]) { Engine.turn(map[e.key]); e.preventDefault(); return; }
+    if (e.key === 'p' || e.key === 'P') {               // 键盘 P 同暂停按钮
+      Engine.togglePause();
+      e.preventDefault();
+    }
   };
   window.addEventListener('keydown', keyFn);
   boundHandlers.push({ target: window, type: 'keydown', fn: keyFn });
@@ -70,4 +78,3 @@ Work.register({
   mount: mount,
   destroy: destroy
 });
-

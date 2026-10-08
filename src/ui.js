@@ -5,6 +5,7 @@ var UI = (function () {
   var stageEl = null, canvasEl = null, actions = null;
   var scoreEl = null, hintEl = null, overEl = null;
   var overScoreEl = null;
+  var pauseEl = null;            // 暂停/继续按钮（右上角）
   var padEl = null;              // 虚拟方向键容器
   var padBtns = [];              // [dir, el] 列表，layout 时重排
   var uiHandlers = [];           // 已绑定监听，destroy 逐一解绑
@@ -55,6 +56,31 @@ var UI = (function () {
       }
     });
     bind(stageEl, 'pointerleave', function () { swipe.down = false; });
+  }
+
+  // 暂停/继续按钮（右上角），点按触发 onPause，随 phase 显隐、切文案
+  function buildPause() {
+    pauseEl = makeOverlay({
+      top: '6px', right: '8px',
+      width: '56px', textAlign: 'center',
+      padding: '4px 0',
+      background: 'rgba(255,255,255,0.18)',
+      borderRadius: '6px',
+      color: '#fff',
+      font: 'bold 14px sans-serif',
+      textShadow: '0 1px 2px rgba(0,0,0,0.6)',
+      cursor: 'pointer',
+      userSelect: 'none',
+      touchAction: 'none',
+      display: 'none',
+      pointerEvents: 'auto'
+    });
+    pauseEl.textContent = '暂停';
+    bind(pauseEl, 'pointerdown', function (e) {
+      e.stopPropagation();
+      if (actions && typeof actions.onPause === 'function') actions.onPause();
+    });
+    stageEl.appendChild(pauseEl);
   }
 
   // 屏幕虚拟方向键（stage 内 absolute 网格布局），点按触发 onSwipe
@@ -158,6 +184,7 @@ var UI = (function () {
     canvasEl = canvas;
     actions = actionMap;
     buildOverlays();
+    buildPause();
     buildPad();
     setupSwipe();
     hintEl.style.display = 'block';
@@ -242,7 +269,19 @@ var UI = (function () {
         overEl.style.display = 'none';
       }
     }
-    if (padEl) padEl.style.display = phase === 'playing' ? 'grid' : 'none';
+    if (padEl) padEl.style.display = phase === 'playing' || phase === 'paused' ? 'grid' : 'none';
+    // 暂停/继续按钮：仅进行中/已暂停可见，文案随状态切换
+    if (pauseEl) {
+      if (phase === 'playing') {
+        pauseEl.style.display = 'block';
+        pauseEl.textContent = '暂停';
+      } else if (phase === 'paused') {
+        pauseEl.style.display = 'block';
+        pauseEl.textContent = '继续';
+      } else {
+        pauseEl.style.display = 'none';
+      }
+    }
   }
 
   function destroy() {
@@ -250,10 +289,10 @@ var UI = (function () {
       h.target.removeEventListener(h.type, h.fn);
     });
     uiHandlers = [];
-    [scoreEl, hintEl, overEl, padEl].forEach(function (el) {
+    [scoreEl, hintEl, overEl, pauseEl, padEl].forEach(function (el) {
       if (el && el.parentNode) el.parentNode.removeChild(el);
     });
-    scoreEl = hintEl = overEl = overScoreEl = padEl = null;
+    scoreEl = hintEl = overEl = overScoreEl = pauseEl = padEl = null;
     padBtns = [];
     stageEl = canvasEl = null;
     actions = null;

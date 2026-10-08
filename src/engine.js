@@ -12,6 +12,7 @@ var Engine = (function () {
   };
   var acc = 0;
   var STEP_MS = 140;
+  var paused = false;
 
   function cellFree(x, y) {
     for (var i = 0; i < state.snake.length; i++) {
@@ -43,6 +44,7 @@ var Engine = (function () {
     state.pendingDir = 'right';
     state.score = 0;
     state.phase = 'ready';
+    paused = false;
     acc = 0;
     spawnFood();
   }
@@ -62,7 +64,23 @@ var Engine = (function () {
     state.pendingDir = dir;
   }
 
+  function togglePause() {
+    if (state.phase !== 'playing' && state.phase !== 'ready') return;
+    paused = !paused;
+    return paused;
+  }
+
+  function setPaused(v) {
+    paused = !!v;
+    return paused;
+  }
+
+  function isPaused() {
+    return paused;
+  }
+
   function advance() {
+    if (paused) return;
     if (state.phase !== 'playing') return;
     state.dir = state.pendingDir;
     var d = DIRS[state.dir];
@@ -91,7 +109,8 @@ var Engine = (function () {
   }
 
   function step(ts) {
-    if (state.phase !== 'playing') { acc = 0; return; }
+    if (paused) { step.last = ts; acc = 0; return; }
+    if (state.phase !== 'playing') { acc = 0; step.last = ts; return; }
     if (!step.last) step.last = ts;
     var dt = ts - step.last;
     step.last = ts;
@@ -131,6 +150,9 @@ var Engine = (function () {
     step: step,
     layout: layout,
     advance: advance,
+    togglePause: togglePause,
+    setPaused: setPaused,
+    isPaused: isPaused,
     STEP_MS: STEP_MS,
     CELL: CELL,
     state: state
